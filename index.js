@@ -3,6 +3,7 @@ import {
   configApi,
   setMaskColor,
   captcha,
+  captchaCustom,
 
   GSError
 } from './src/api'
@@ -17,5 +18,6 @@ export default {
   enableDebug,
   configApi,
   setMaskColor,
-  captcha
+  captcha,
+  captchaCustom,
 }

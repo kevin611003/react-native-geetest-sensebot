@@ -168,6 +168,56 @@ export const captcha = async argument => {
 }
 
 /**
+ * captchaCustom 自定义行为验证
+ */
+export const captchaCustom = async captchaParams => {
+  // initial captcha manager
+  await GeetestSensebot.initCaptchaMgr(GSConfig.maskColor, GSConfig.isDebug)
+
+  // captcha
+  try {
+    validCaptchaParams(captchaParams)
+  } catch (e) {
+    throw new GSError({
+      errCode: ERROR_TYPE.CAPTCHA,
+      errMsg: `captcha params error, ${e.message}`
+    })
+  }
+  const capcataStartRes = await GeetestSensebot.captcha(
+    captchaParams.success,
+    captchaParams.gt,
+    captchaParams.challenge,
+    ''
+  )
+  if (!capcataStartRes) {
+    throw new GSError({
+      errCode: ERROR_TYPE.CAPTCHA,
+      errMsg: 'captcha start failed, can\'t find captcha manager.'
+    })
+  }
+  const captchaRes = await rnGSEventListener(EVENT_TYPE.CAPTCHA)
+  payload = captchaRes.payload
+  errCode = captchaRes.errCode
+  errMsg = captchaRes.errMsg
+  if (errCode) {
+    throw new GSError({ errCode: ERROR_TYPE.CAPTCHA, errMsg })
+  }
+  // from sdk @param code 验证交互结果, 0失败/1成功
+  if (payload.code !== '1') {
+    throw new GSError({
+      errCode: ERROR_TYPE.CAPTCHA,
+      errMsg: `captcha valid failed, ${payload.message}`
+    })
+  } else {
+    //返回交互结果，由使用者自定义验证
+    return payload.result
+  }
+
+  // clean
+  stopCaptcha()
+}
+
+/**
  * stopCaptcha 停止行为验证
  */
 const stopCaptcha = () => {
